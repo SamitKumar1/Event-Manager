@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ATTENDEE
+  ORGANIZER
+  ADMIN
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum EventLocationType {
+  PHYSICAL
+  ONLINE
+  HYBRID
+}
+
+enum ReservationStatus {
+  ACTIVE
+  EXPIRED
+  CONFIRMED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ATTENDEE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organizationMemberships OrganizationMember[]
+  createdEvents Event[]
+  ticketReservations TicketReservation[]
+  orders Order[]
+  tickets Ticket[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Organization {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     OrganizationMember[]
+  events      Event[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String            @id @default(uuid()) @db.Uuid
+  userId         String            @db.Uuid
+  organizationId String            @db.Uuid
+  role           OrganizationRole  @default(MEMBER)
+  joinedAt       DateTime          @default(now())
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@map("organization_members")
+}
+
+model Event {
+  id            String            @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  createdById   String            @db.Uuid
+  title         String
+  slug          String
+  description   String?
+  status        EventStatus       @default(DRAFT)
+  locationType  EventLocationType @default(PHYSICAL)
+  venueName     String?
+  address       String?
+  city          String?
+  country       String?
+  startAt       DateTime
+  endAt         DateTime
+  timezone      String
+  coverImageUrl String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy     User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  ticketTypes   TicketType[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, startAt])
+  @@map("events")
+}
+
+model TicketType {
+  id            String    @id @default(uuid()) @db.Uuid
+  eventId       String    @db.Uuid
+  name          String
+  description   String?
+  price         Decimal   @db.Decimal(10, 2)
+  quantity      Int
+  salesStartAt  DateTime
+  salesEndAt    DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reservations  TicketReservation[]
+  orderItems    OrderItem[]
+  tickets       Ticket[]
+
+  @@unique([eventId, name])
+  @@index([eventId])
+  @@map("ticket_types")
+}
+
+model TicketReservation {
+  id            String            @id @default(uuid()) @db.Uuid
+  ticketTypeId  String            @db.Uuid
+  userId        String            @db.Uuid
+  quantity      Int
+  status        ReservationStatus @default(ACTIVE)
+  expiresAt     DateTime
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  ticketType    TicketType        @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([ticketTypeId])
+  @@index([userId])
+  @@index([ticketTypeId, status])
+  @@index([expiresAt])
+  @@map("ticket_reservations")
+}
+
+model Order {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @db.Uuid
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2)
+  currency    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items       OrderItem[]
+  payments    Payment[]
+  tickets     Ticket[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model Payment {
+  id                 String        @id @default(uuid()) @db.Uuid
+  orderId            String        @db.Uuid
+  status             PaymentStatus @default(PENDING)
+  amount             Decimal       @db.Decimal(10, 2)
+  currency           String
+  provider           String
+  providerPaymentId  String?
+  idempotencyKey     String        @unique
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  order              Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payments")
+}
+
+model OrderItem {
+  id            String  @id @default(uuid()) @db.Uuid
+  orderId       String  @db.Uuid
+  ticketTypeId  String  @db.Uuid
+  quantity      Int
+  unitPrice     Decimal @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketType    TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  tickets       Ticket[]
+
+  @@index([orderId])
+  @@index([ticketTypeId])
+  @@map("order_items")
+}
+
+model Ticket {
+  id            String      @id @default(uuid()) @db.Uuid
+  orderId       String      @db.Uuid
+  orderItemId   String      @db.Uuid
+  ticketTypeId  String      @db.Uuid
+  userId        String      @db.Uuid
+  ticketCode    String      @unique
+  qrToken       String      @unique
+  status        TicketStatus @default(VALID)
+  checkedInAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  orderItem     OrderItem   @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  ticketType    TicketType  @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([ticketTypeId])
+  @@index([orderId])
+  @@index([status])
+  @@map("tickets")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  type      String
+  title     String
+  message   String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
