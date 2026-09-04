@@ -88,17 +88,41 @@ export class TicketsService {
   }
 
   async findMyTickets(userId: string, page = 1, limit = 20) {
-    const skip = (page - 1) * limit;
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.ticket.findMany({
-        where: { userId },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: { ticketType: true, order: true },
-      }),
-      this.prisma.ticket.count({ where: { userId } }),
-    ]);
-    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
-  }
+  const skip = (page - 1) * limit;
+
+  const [items, total] = await this.prisma.$transaction([
+    this.prisma.ticket.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ticketType: true,
+        order: {
+          include: {
+            items: {
+              include: {
+                ticketType: {
+                  include: {
+                    event: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+    this.prisma.ticket.count({ where: { userId } }),
+  ]);
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
 }

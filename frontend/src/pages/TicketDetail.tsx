@@ -92,9 +92,18 @@ export default function TicketDetail() {
     );
   }
 
-  const eventTitle = ticket.order?.items[0]?.ticketType?.event?.title || ticket.ticketType?.event?.title || 'Event';
-  const ticketTypeName = ticket.ticketType?.name || 'Ticket';
-  const event = ticket.order?.items[0]?.ticketType?.event || ticket.ticketType?.event;
+  const orderItem = ticket.order?.items?.[0];
+
+const eventTitle =
+  orderItem?.ticketType?.event?.title ||
+  ticket.ticketType?.event?.title ||
+  'Event';
+
+const ticketTypeName = ticket.ticketType?.name || 'Ticket';
+
+const event =
+  orderItem?.ticketType?.event ||
+  ticket.ticketType?.event;
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -155,16 +164,25 @@ export default function TicketDetail() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">QR Code for Check-in</h3>
             <div className="flex flex-col items-center space-y-4">
               <div className="w-64 h-64 bg-white rounded-lg flex items-center justify-center border border-gray-200 p-4">
-                <QRCodeSVG
-                    value={qrData?.qrToken || ticket.qrToken}
-                  size={256}
-                  level="M"
-                  includeMargin={true}
-                />
+                {(qrData?.qrToken || ticket.qrToken) ? (
+  <QRCodeSVG
+    value={qrData?.qrToken || ticket.qrToken}
+    size={256}
+    level="M"
+    includeMargin={true}
+  />
+) : (
+  <p className="text-red-600 text-sm">QR code is not available</p>
+)}
+                
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-500">Present this QR code at the event for check-in</p>
-                <p className="text-xs text-gray-400 mt-1 font-mono break-all">{qrData?.qrToken || ticket.qrToken}</p>
+                {(qrData?.qrToken || ticket.qrToken) && (
+  <p className="text-xs text-gray-400 mt-1 font-mono break-all">
+    {qrData?.qrToken || ticket.qrToken}
+  </p>
+)}
               </div>
             </div>
           </div>

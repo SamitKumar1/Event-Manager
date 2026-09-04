@@ -595,7 +595,22 @@ function CreateEventModal({ onClose, onSubmit }: { onClose: () => void; onSubmit
     setError(null);
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = { ...formData };
+      // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO 8601 with seconds
+      if (submitData.startAt && submitData.startAt.length === 16) {
+        submitData.startAt = `${submitData.startAt}:00`;
+      }
+      if (submitData.endAt && submitData.endAt.length === 16) {
+        submitData.endAt = `${submitData.endAt}:00`;
+      }
+      // Remove empty optional fields (send undefined instead of empty string)
+      Object.keys(submitData).forEach((key) => {
+        const value = submitData[key as keyof typeof submitData];
+        if (value === '') {
+          delete submitData[key as keyof typeof submitData];
+        }
+      });
+      await onSubmit(submitData as typeof formData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
     } finally {
@@ -804,7 +819,22 @@ function EditEventModal({
     setError(null);
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = { ...formData };
+      // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO 8601 with seconds
+      if (submitData.startAt && submitData.startAt.length === 16) {
+        submitData.startAt = `${submitData.startAt}:00`;
+      }
+      if (submitData.endAt && submitData.endAt.length === 16) {
+        submitData.endAt = `${submitData.endAt}:00`;
+      }
+      // Remove empty optional fields (send undefined instead of empty string)
+      Object.keys(submitData).forEach((key) => {
+        const value = submitData[key as keyof typeof submitData];
+        if (value === '') {
+          delete submitData[key as keyof typeof submitData];
+        }
+      });
+      await onSubmit(submitData as typeof formData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update event');
     } finally {

@@ -335,7 +335,15 @@ function CreateTicketTypeModal({
     setError(null);
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = { ...formData };
+      // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO 8601 with seconds
+      if (submitData.salesStartAt && submitData.salesStartAt.length === 16) {
+        submitData.salesStartAt = `${submitData.salesStartAt}:00`;
+      }
+      if (submitData.salesEndAt && submitData.salesEndAt.length === 16) {
+        submitData.salesEndAt = `${submitData.salesEndAt}:00`;
+      }
+      await onSubmit(submitData as CreateTicketTypeRequest);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create ticket type');
     } finally {
@@ -446,8 +454,8 @@ function EditTicketTypeModal({
     description: ticketType.description || '',
     price: parseFloat(ticketType.price),
     quantity: ticketType.quantity,
-    salesStartAt: ticketType.salesStartAt,
-    salesEndAt: ticketType.salesEndAt,
+    salesStartAt: ticketType.salesStartAt.slice(0, 16),
+    salesEndAt: ticketType.salesEndAt.slice(0, 16),
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -461,7 +469,15 @@ function EditTicketTypeModal({
     setError(null);
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = { ...formData };
+      // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO 8601 with seconds
+      if (submitData.salesStartAt && submitData.salesStartAt.length === 16) {
+        submitData.salesStartAt = `${submitData.salesStartAt}:00`;
+      }
+      if (submitData.salesEndAt && submitData.salesEndAt.length === 16) {
+        submitData.salesEndAt = `${submitData.salesEndAt}:00`;
+      }
+      await onSubmit(submitData as UpdateTicketTypeRequest);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update ticket type');
     } finally {
