@@ -38,7 +38,7 @@ function ProgressBar({ value, max, color = 'green' }: { value: number; max: numb
     yellow: 'bg-yellow-500',
   };
   return (
-    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+    <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden">
       <div
         className={`${colors[color as keyof typeof colors] || colors.green} h-full rounded-full transition-all duration-300`}
         style={{ width: `${percentage}%` }}
@@ -118,8 +118,8 @@ export default function EventAnalytics() {
         <Link to="/organizer" className="text-primary-600 hover:text-primary-500">
           ← Back to Organizer Dashboard
         </Link>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-          <p className="text-red-600">{error || 'Event not found'}</p>
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border text-center">
+          <p className="text-danger">{error || 'Event not found'}</p>
         </div>
       </div>
     );
@@ -140,15 +140,15 @@ export default function EventAnalytics() {
           <Link to="/organizer" className="text-primary-600 hover:text-primary-500 text-sm">
             ← Back to Organizer Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">{event.title} - Analytics</h1>
-          <p className="text-sm text-gray-500">{formatDate(event.startAt)} - {formatDate(event.endAt)}</p>
+          <h1 className="text-2xl font-bold text-text mt-1">{event.title} - Analytics</h1>
+          <p className="text-sm text-text-muted">{formatDate(event.startAt)} - {formatDate(event.endAt)}</p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md flex items-center justify-between animate-fade-in">
+        <div className="bg-danger-soft text-danger p-4 rounded-md flex items-center justify-between animate-fade-in">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">✕</button>
+          <button onClick={() => setError(null)} className="text-danger hover:text-danger">✕</button>
         </div>
       )}
 
@@ -165,15 +165,15 @@ export default function EventAnalytics() {
       </div>
 
       {/* Capacity Progress Bar */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-900">Capacity Utilization</h3>
-          <span className="text-sm font-medium text-gray-600">
+          <h3 className="text-lg font-semibold text-text">Capacity Utilization</h3>
+          <span className="text-sm font-medium text-text-muted">
             {formatNumber(analytics.ticketsSold)} / {formatNumber(analytics.totalTicketCapacity)} ({soldPercentage.toFixed(1)}%)
           </span>
         </div>
         <ProgressBar value={analytics.ticketsSold} max={analytics.totalTicketCapacity} color="green" />
-        <div className="mt-2 flex justify-between text-xs text-gray-500">
+        <div className="mt-2 flex justify-between text-xs text-text-muted">
           <span>0</span>
           <span>{formatNumber(analytics.totalTicketCapacity)}</span>
         </div>
@@ -206,9 +206,9 @@ export default function EventAnalytics() {
 
       {/* Ticket Types Breakdown */}
       {event.ticketTypes && event.ticketTypes.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Ticket Types Breakdown</h2>
+        <div className="bg-surface rounded-lg shadow-sm border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h2 className="text-lg font-semibold text-text">Ticket Types Breakdown</h2>
           </div>
           <div className="divide-y divide-gray-200">
             {event.ticketTypes.map((tt) => (
@@ -223,21 +223,21 @@ export default function EventAnalytics() {
 
 function StatCard({ title, value, color = 'indigo' }: { title: string; value: string; color?: string }) {
   const colors = {
-    indigo: 'bg-indigo-100 text-indigo-800',
-    green: 'bg-green-100 text-green-800',
-    blue: 'bg-blue-100 text-blue-800',
-    purple: 'bg-purple-100 text-purple-800',
-    red: 'bg-red-100 text-red-800',
-    yellow: 'bg-yellow-100 text-yellow-800',
+    indigo: 'bg-info-soft text-info',
+    green: 'bg-success-soft text-success',
+    blue: 'bg-info-soft text-info',
+    purple: 'bg-info-soft text-info',
+    red: 'bg-danger-soft text-danger',
+    yellow: 'bg-warning-soft text-warning',
     emerald: 'bg-emerald-100 text-emerald-800',
-    orange: 'bg-orange-100 text-orange-800',
-    rose: 'bg-rose-100 text-rose-800',
+    orange: 'bg-warning-soft text-warning',
+    rose: 'bg-danger-soft text-danger',
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <p className="text-sm font-medium text-gray-500">{title}</p>
-      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
+    <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
+      <p className="text-sm font-medium text-text-muted">{title}</p>
+      <p className="mt-2 text-3xl font-bold text-text">{value}</p>
       <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
         <span className={colors[color as keyof typeof colors] || colors.indigo}>Event</span>
       </div>
@@ -247,13 +247,13 @@ function StatCard({ title, value, color = 'indigo' }: { title: string; value: st
 
 function DetailCard({ title, items }: { title: string; items: { label: string; value: string }[] }) {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-sm font-medium text-gray-900 mb-4">{title}</h3>
+    <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
+      <h3 className="text-sm font-medium text-text mb-4">{title}</h3>
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={index} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
-            <span className="text-sm text-gray-600">{item.label}</span>
-            <span className="text-sm font-medium text-gray-900">{item.value}</span>
+          <div key={index} className="flex justify-between py-2 border-b border-border last:border-0">
+            <span className="text-sm text-text-muted">{item.label}</span>
+            <span className="text-sm font-medium text-text">{item.value}</span>
           </div>
         ))}
       </div>
@@ -263,14 +263,14 @@ function DetailCard({ title, items }: { title: string; items: { label: string; v
 
 function TicketTypeAnalyticsRow({ ticketType }: { ticketType: TicketType }) {
   return (
-    <div className="px-6 py-4 hover:bg-gray-50">
+    <div className="px-6 py-4 hover:bg-bg">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h3 className="font-medium text-gray-900">{ticketType.name}</h3>
-          <p className="text-sm text-gray-500">{ticketType.description || 'No description'}</p>
-          <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-            <span>Price: <span className="font-medium text-gray-900">{formatCurrency(ticketType.price)}</span></span>
-            <span>Quantity: <span className="font-medium text-gray-900">{ticketType.quantity}</span></span>
+          <h3 className="font-medium text-text">{ticketType.name}</h3>
+          <p className="text-sm text-text-muted">{ticketType.description || 'No description'}</p>
+          <div className="mt-1 flex items-center space-x-4 text-sm text-text-muted">
+            <span>Price: <span className="font-medium text-text">{formatCurrency(ticketType.price)}</span></span>
+            <span>Quantity: <span className="font-medium text-text">{ticketType.quantity}</span></span>
           </div>
         </div>
       </div>

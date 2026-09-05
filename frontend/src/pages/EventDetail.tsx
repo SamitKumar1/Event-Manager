@@ -120,9 +120,9 @@ export default function EventDetail() {
             ← Back to Events
           </Link>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
           <div className="text-center py-12">
-            <p className="text-red-600">{error || 'Event not found'}</p>
+            <p className="text-danger">{error || 'Event not found'}</p>
             <Link
               to="/events"
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
@@ -143,7 +143,7 @@ export default function EventDetail() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-surface rounded-lg shadow-sm border border-border overflow-hidden">
         {event.coverImageUrl && (
           <img
             src={event.coverImageUrl}
@@ -154,14 +154,14 @@ export default function EventDetail() {
         <div className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{event.title}</h1>
-              <p className="mt-2 text-gray-600">{event.description || 'No description available'}</p>
+              <h1 className="text-3xl font-bold text-text">{event.title}</h1>
+              <p className="mt-2 text-text-muted">{event.description || 'No description available'}</p>
             </div>
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                 event.status === 'PUBLISHED'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-success-soft text-success'
+                  : 'bg-surface-2 text-text'
               }`}
             >
               {event.status}
@@ -170,18 +170,18 @@ export default function EventDetail() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Date & Time</h3>
-              <p className="mt-1 text-gray-900">{formatDate(event.startAt)} - {formatDate(event.endAt)}</p>
-              <p className="text-sm text-gray-500">{event.timezone}</p>
+              <h3 className="text-sm font-medium text-text-muted">Date & Time</h3>
+              <p className="mt-1 text-text">{formatDate(event.startAt)} - {formatDate(event.endAt)}</p>
+              <p className="text-sm text-text-muted">{event.timezone}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Location</h3>
+              <h3 className="text-sm font-medium text-text-muted">Location</h3>
               {event.locationType === 'ONLINE' ? (
-                <p className="mt-1 text-gray-900">Online Event</p>
+                <p className="mt-1 text-text">Online Event</p>
               ) : (
                 <>
-                  <p className="mt-1 text-gray-900">{event.venueName}</p>
-                  <p className="text-gray-900">
+                  <p className="mt-1 text-text">{event.venueName}</p>
+                  <p className="text-text">
                     {event.address}
                     {event.city && `, ${event.city}`}
                     {event.country && `, ${event.country}`}
@@ -193,7 +193,7 @@ export default function EventDetail() {
 
           {publishedTicketTypes.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-xl font-bold text-gray-900">Available Tickets</h2>
+              <h2 className="text-xl font-bold text-text">Available Tickets</h2>
               <div className="mt-4 space-y-4">
                 {publishedTicketTypes.map((tt) => (
                   <TicketTypeReservation
@@ -242,23 +242,23 @@ function TicketTypeReservation({
   const available = ticketType.quantity;
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4">
+    <div className="border border-border rounded-lg p-4">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">{ticketType.name}</h3>
-          {ticketType.description && <p className="mt-1 text-sm text-gray-500">{ticketType.description}</p>}
-          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-            <span>Price: <span className="font-medium text-gray-900">{formatPrice(ticketType.price)}</span></span>
-            <span>Available: <span className={available > 0 ? 'text-green-600' : 'text-red-600'} font-medium>{available}</span></span>
+          <h3 className="text-lg font-medium text-text">{ticketType.name}</h3>
+          {ticketType.description && <p className="mt-1 text-sm text-text-muted">{ticketType.description}</p>}
+          <div className="mt-2 flex items-center space-x-4 text-sm text-text-muted">
+            <span>Price: <span className="font-medium text-text">{formatPrice(ticketType.price)}</span></span>
+            <span>Available: <span className={available > 0 ? 'text-success' : 'text-danger'} font-medium>{available}</span></span>
             <span>Sales: {new Date(ticketType.salesStartAt).toLocaleDateString()} - {new Date(ticketType.salesEndAt).toLocaleDateString()}</span>
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center border border-gray-300 rounded-md">
+          <div className="flex items-center border border-border rounded-md">
             <button
               onClick={() => onQuantityChange(ticketType.id, Math.max(1, quantity - 1))}
               disabled={quantity <= 1 || isReserving}
-              className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-text-muted hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               −
             </button>
@@ -266,7 +266,7 @@ function TicketTypeReservation({
             <button
               onClick={() => onQuantityChange(ticketType.id, quantity + 1)}
               disabled={quantity >= available || isReserving}
-              className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-text-muted hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -284,25 +284,25 @@ function TicketTypeReservation({
       {(reservationError || reservationSuccess) && (
         <div className="mt-4 p-3 rounded-md animate-fade-in">
           {reservationError && (
-            <div className="bg-red-50 text-red-600 flex items-center justify-between">
+            <div className="bg-danger-soft text-danger flex items-center justify-between">
               <span>{reservationError}</span>
-              <button onClick={clearMessages} className="text-red-600 hover:text-red-800">
+              <button onClick={clearMessages} className="text-danger hover:text-danger">
                 ✕
               </button>
             </div>
           )}
           {reservationSuccess && (
-            <div className="bg-green-50 text-green-600 flex items-center justify-between">
+            <div className="bg-success-soft text-success flex items-center justify-between">
               <span>
                 ✓ Reservation created! Expires at {new Date(reservationSuccess.expiresAt).toLocaleTimeString()}
                 <button
                   onClick={() => window.location.href = `/checkout?reservation=${reservationSuccess.id}`}
-                  className="ml-3 text-sm underline hover:text-green-800"
+                  className="ml-3 text-sm underline hover:text-success"
                 >
                   Proceed to Checkout
                 </button>
               </span>
-              <button onClick={clearMessages} className="text-green-600 hover:text-green-800">
+              <button onClick={clearMessages} className="text-success hover:text-success">
                 ✕
               </button>
             </div>

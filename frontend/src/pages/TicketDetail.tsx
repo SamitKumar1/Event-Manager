@@ -77,9 +77,9 @@ export default function TicketDetail() {
         <Link to="/tickets" className="text-primary-600 hover:text-primary-500">
           ← Back to Tickets
         </Link>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
           <div className="text-center py-12">
-            <p className="text-red-600">{error || 'Ticket not found'}</p>
+            <p className="text-danger">{error || 'Ticket not found'}</p>
             <Link
               to="/tickets"
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
@@ -111,26 +111,26 @@ const event =
         ← Back to Tickets
       </Link>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h1 className="text-2xl font-bold text-gray-900">Ticket Details</h1>
+      <div className="bg-surface rounded-lg shadow-sm border border-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-border bg-bg">
+          <h1 className="text-2xl font-bold text-text">Ticket Details</h1>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Ticket Info */}
-          <div className="border border-gray-200 rounded-lg p-6">
+          <div className="border border-border rounded-lg p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{eventTitle}</h2>
-                <p className="mt-1 text-gray-600">{ticketTypeName}</p>
+                <h2 className="text-xl font-bold text-text">{eventTitle}</h2>
+                <p className="mt-1 text-text-muted">{ticketTypeName}</p>
               </div>
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                   ticket.status === 'VALID'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-success-soft text-success'
                     : ticket.status === 'USED'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-red-100 text-red-800'
+                      ? 'bg-info-soft text-info'
+                      : 'bg-danger-soft text-danger'
                 }`}
               >
                 {ticket.status}
@@ -139,31 +139,31 @@ const event =
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div>
-                <label className="text-sm font-medium text-gray-500">Ticket Code</label>
-                <p className="mt-1 font-mono text-lg text-gray-900">{ticket.ticketCode}</p>
+                <label className="text-sm font-medium text-text-muted">Ticket Code</label>
+                <p className="mt-1 font-mono text-lg text-text">{ticket.ticketCode}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Order ID</label>
-                <p className="mt-1 font-mono text-sm text-gray-900">{ticket.orderId}</p>
+                <label className="text-sm font-medium text-text-muted">Order ID</label>
+                <p className="mt-1 font-mono text-sm text-text">{ticket.orderId}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Purchased</label>
-                <p className="mt-1 text-gray-900">{formatDate(ticket.createdAt)}</p>
+                <label className="text-sm font-medium text-text-muted">Purchased</label>
+                <p className="mt-1 text-text">{formatDate(ticket.createdAt)}</p>
               </div>
               {ticket.checkedInAt && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Checked In</label>
-                  <p className="mt-1 text-gray-900">{formatDate(ticket.checkedInAt)}</p>
+                  <label className="text-sm font-medium text-text-muted">Checked In</label>
+                  <p className="mt-1 text-text">{formatDate(ticket.checkedInAt)}</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* QR Code / Token */}
-          <div className="border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">QR Code for Check-in</h3>
+          <div className="border border-border rounded-lg p-6">
+            <h3 className="text-lg font-medium text-text mb-4">QR Code for Check-in</h3>
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-64 h-64 bg-white rounded-lg flex items-center justify-center border border-gray-200 p-4">
+              <div className="w-64 h-64 bg-surface rounded-lg flex items-center justify-center border border-border p-4">
                 {(qrData?.qrToken || ticket.qrToken) ? (
   <QRCodeSVG
     value={qrData?.qrToken || ticket.qrToken}
@@ -172,14 +172,14 @@ const event =
     includeMargin={true}
   />
 ) : (
-  <p className="text-red-600 text-sm">QR code is not available</p>
+  <p className="text-danger text-sm">QR code is not available</p>
 )}
                 
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-500">Present this QR code at the event for check-in</p>
+                <p className="text-sm text-text-muted">Present this QR code at the event for check-in</p>
                 {(qrData?.qrToken || ticket.qrToken) && (
-  <p className="text-xs text-gray-400 mt-1 font-mono break-all">
+  <p className="text-xs text-text-subtle mt-1 font-mono break-all">
     {qrData?.qrToken || ticket.qrToken}
   </p>
 )}
@@ -189,26 +189,26 @@ const event =
 
           {/* Event Info */}
           {event && (
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Event Information</h3>
+            <div className="border border-border rounded-lg p-6">
+              <h3 className="text-lg font-medium text-text mb-4">Event Information</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Date</span>
-                  <span className="text-gray-900">
+                  <span className="text-text-muted">Date</span>
+                  <span className="text-text">
                     {formatDate(event.startAt)} -{' '}
                     {new Date(event.endAt).toLocaleTimeString()}
                   </span>
                 </div>
                 {event.venueName && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Venue</span>
-                    <span className="text-gray-900">{event.venueName}</span>
+                    <span className="text-text-muted">Venue</span>
+                    <span className="text-text">{event.venueName}</span>
                   </div>
                 )}
                 {event.address && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Address</span>
-                    <span className="text-gray-900">
+                    <span className="text-text-muted">Address</span>
+                    <span className="text-text">
                       {event.address}
                       {event.city && `, ${event.city}`}
                       {event.country && `, ${event.country}`}

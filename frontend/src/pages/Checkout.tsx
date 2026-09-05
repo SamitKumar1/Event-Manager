@@ -124,9 +124,9 @@ export default function Checkout() {
   if (error && !reservation) {
     return (
       <div className="space-y-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
           <div className="text-center py-12">
-            <p className="text-red-600">{error}</p>
+            <p className="text-danger">{error}</p>
             <Link
               to="/events"
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
@@ -155,28 +155,28 @@ export default function Checkout() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+      <div className="bg-surface rounded-lg shadow-sm border border-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-border bg-bg">
+          <h1 className="text-2xl font-bold text-text">Checkout</h1>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Reservation Summary */}
-          <div className="border border-gray-200 rounded-lg p-4">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Reservation Summary</h2>
+          <div className="border border-border rounded-lg p-4">
+            <h2 className="text-lg font-medium text-text mb-4">Reservation Summary</h2>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">{ticketType?.name}</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-text">{ticketType?.name}</p>
+                <p className="text-sm text-text-muted">
                   {ticketType?.event?.title}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium text-gray-900">{formatPrice(unitPrice)} × {reservation.quantity}</p>
-                <p className="text-sm text-gray-500">Expires: {new Date(reservation.expiresAt).toLocaleString()}</p>
+                <p className="font-medium text-text">{formatPrice(unitPrice)} × {reservation.quantity}</p>
+                <p className="text-sm text-text-muted">Expires: {new Date(reservation.expiresAt).toLocaleString()}</p>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between font-medium">
+            <div className="mt-4 pt-4 border-t border-border flex justify-between font-medium">
               <span>Total</span>
               <span>{formatPrice(totalAmount.toFixed(2))}</span>
             </div>
@@ -184,11 +184,11 @@ export default function Checkout() {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-md flex items-center justify-between">
+            <div className="bg-danger-soft text-danger p-4 rounded-md flex items-center justify-between">
               <span>{error}</span>
               <button
                 onClick={() => setError(null)}
-                className="text-red-600 hover:text-red-800"
+                className="text-danger hover:text-danger"
               >
                 ✕
               </button>
@@ -197,9 +197,9 @@ export default function Checkout() {
 
           {/* Step 1: Create Order */}
           {!order && (
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Step 1: Create Order</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="border border-border rounded-lg p-6">
+              <h3 className="text-lg font-medium text-text mb-4">Step 1: Create Order</h3>
+              <p className="text-text-muted mb-4">
                 Your reservation is active. Create an order to proceed to payment.
               </p>
               <button
@@ -214,22 +214,22 @@ export default function Checkout() {
 
           {/* Step 2: Payment */}
           {order && !payment && (
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Step 2: Payment</h3>
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div className="border border-border rounded-lg p-6">
+              <h3 className="text-lg font-medium text-text mb-4">Step 2: Payment</h3>
+              <div className="mb-4 p-4 bg-bg rounded-lg">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Order Total</span>
-                  <span className="font-semibold text-gray-900">{formatPrice(order.totalAmount)}</span>
+                  <span className="text-text-muted">Order Total</span>
+                  <span className="font-semibold text-text">{formatPrice(order.totalAmount)}</span>
                 </div>
                 <div className="mt-2 flex justify-between text-sm">
-                  <span className="text-gray-500">Order ID</span>
-                  <span className="font-mono text-gray-900">{order.id}</span>
+                  <span className="text-text-muted">Order ID</span>
+                  <span className="font-mono text-text">{order.id}</span>
                 </div>
               </div>
               <button
                 onClick={handlePayment}
                 disabled={processingPayment}
-                className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 disabled:opacity-50"
               >
                 {processingPayment ? 'Processing Payment...' : 'Pay Now'}
               </button>
@@ -238,24 +238,24 @@ export default function Checkout() {
 
           {/* Step 3: Payment Result */}
           {payment && (
-            <div className={`border rounded-lg p-6 ${payment.status === 'SUCCEEDED' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+            <div className={`border rounded-lg p-6 ${payment.status === 'SUCCEEDED' ? 'border-success bg-success-soft' : 'border-danger bg-danger-soft'}`}>
+              <h3 className="text-lg font-medium text-text mb-4">
                 {payment.status === 'SUCCEEDED' ? '✓ Payment Successful' : '✗ Payment Failed'}
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Payment Status</span>
-                  <span className={`font-medium ${payment.status === 'SUCCEEDED' ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-text-muted">Payment Status</span>
+                  <span className={`font-medium ${payment.status === 'SUCCEEDED' ? 'text-success' : 'text-danger'}`}>
                     {payment.status}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Amount</span>
-                  <span className="font-medium text-gray-900">{formatPrice(payment.amount)}</span>
+                  <span className="text-text-muted">Amount</span>
+                  <span className="font-medium text-text">{formatPrice(payment.amount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Order ID</span>
-                  <span className="font-mono text-gray-900">{payment.orderId}</span>
+                  <span className="text-text-muted">Order ID</span>
+                  <span className="font-mono text-text">{payment.orderId}</span>
                 </div>
               </div>
 
@@ -278,7 +278,7 @@ export default function Checkout() {
                       setOrder(null);
                       setIdempotencyKey(generateIdempotencyKey(order.id));
                     }}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-border text-sm font-medium rounded-md text-text-muted bg-surface hover:bg-bg"
                   >
                     Try Again
                   </button>

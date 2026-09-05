@@ -68,10 +68,10 @@ export default function MyTickets() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Tickets</h1>
-          <p className="mt-1 text-gray-600">View and manage your tickets</p>
+          <h1 className="text-3xl font-bold text-text">My Tickets</h1>
+          <p className="mt-1 text-text-muted">View and manage your tickets</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent" />
           </div>
@@ -83,21 +83,21 @@ export default function MyTickets() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">My Tickets</h1>
-        <p className="mt-1 text-gray-600">View and manage your tickets</p>
+        <h1 className="text-3xl font-bold text-text">My Tickets</h1>
+        <p className="mt-1 text-text-muted">View and manage your tickets</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md">
+        <div className="bg-danger-soft text-danger p-4 rounded-md">
           Failed to load tickets: {error}
         </div>
       )}
 
       {tickets.length === 0 ? (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-surface p-6 rounded-lg shadow-sm border border-border">
           <div className="text-center py-12">
-            <p className="text-gray-500">{orderId ? 'No tickets found for this order' : 'No tickets yet'}</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-text-muted">{orderId ? 'No tickets found for this order' : 'No tickets yet'}</p>
+            <p className="text-sm text-text-subtle mt-1">
               {orderId ? 'Try checking all your tickets' : 'Purchase tickets from events to see them here'}
             </p>
             {!orderId && (
@@ -112,7 +112,7 @@ export default function MyTickets() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-surface rounded-lg shadow-sm border border-border overflow-hidden">
             <div className="divide-y divide-gray-200">
               {tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
@@ -125,17 +125,17 @@ export default function MyTickets() {
               <button
                 onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1.5 text-sm font-medium text-text-muted bg-surface border border-border rounded-md hover:bg-bg disabled:opacity-50"
               >
                 Previous
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-text-muted">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
               <button
                 onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.totalPages}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1.5 text-sm font-medium text-text-muted bg-surface border border-border rounded-md hover:bg-bg disabled:opacity-50"
               >
                 Next
               </button>
@@ -152,26 +152,26 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
   const ticketTypeName = ticket.ticketType?.name || 'Ticket';
 
   return (
-    <div className="p-6 hover:bg-gray-50">
+    <div className="p-6 hover:bg-bg">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center font-mono text-xs text-gray-500">
+          <div className="w-16 h-16 bg-surface-2 rounded-lg flex items-center justify-center font-mono text-xs text-text-muted">
             QR
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{eventTitle}</h3>
-            <p className="text-sm text-gray-500">{ticketTypeName}</p>
-            <p className="text-sm text-gray-500 font-mono">{ticket.ticketCode}</p>
+            <h3 className="text-lg font-medium text-text">{eventTitle}</h3>
+            <p className="text-sm text-text-muted">{ticketTypeName}</p>
+            <p className="text-sm text-text-muted font-mono">{ticket.ticketCode}</p>
           </div>
         </div>
         <div className="mt-4 md:mt-0 flex items-center space-x-4">
           <span
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
               ticket.status === 'VALID'
-                ? 'bg-green-100 text-green-800'
+                ? 'bg-success-soft text-success'
                 : ticket.status === 'USED'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-info-soft text-info'
+                  : 'bg-danger-soft text-danger'
             }`}
           >
             {ticket.status}

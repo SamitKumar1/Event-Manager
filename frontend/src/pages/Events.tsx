@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { eventsApi } from '../api/endpoints';
+import { useAuth } from '../context/useAuth';
+import { PageHeader, Card, Button, StatusPill, EmptyState, Spinner } from '../components/ui';
 import type { Event, TicketType } from '../types/api';
 
 function formatDate(dateString: string): string {
@@ -22,11 +23,47 @@ function formatPrice(price: string): string {
   }).format(Number(price));
 }
 
-function getAvailableQuantity(ticketType: TicketType): number {
-  return ticketType.quantity;
-}
+const CalendarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const GlobeIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
 
 export default function Events() {
+  const { isAuthenticated } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,16 +101,13 @@ export default function Events() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-          <p className="mt-1 text-gray-600">Browse and discover events</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <PageHeader title="Events" subtitle="Browse and discover events" />
+        <Card>
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent" />
+            <Spinner size="lg" />
             <span className="sr-only">Loading events...</span>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -81,39 +115,41 @@ export default function Events() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-          <p className="mt-1 text-gray-600">Browse and discover events</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-center py-12">
-            <p className="text-red-600">Failed to load events: {error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
+        <PageHeader title="Events" subtitle="Browse and discover events" />
+        <Card>
+          <EmptyState
+            title="Couldn't load events"
+            description={error}
+            action={
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            }
+          />
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-        <p className="mt-1 text-gray-600">Browse and discover events</p>
-      </div>
+      <PageHeader
+        title="Events"
+        subtitle="Browse and discover events"
+        actions={
+          isAuthenticated ? (
+            <Button as="a" to="/organizer" variant="secondary">
+              Create Event
+            </Button>
+          ) : undefined
+        }
+      />
 
       {events.length === 0 ? (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-center py-12">
-            <p className="text-gray-500">No events available yet</p>
-            <p className="text-sm text-gray-400 mt-1">Check back later for new events</p>
-          </div>
-        </div>
+        <Card>
+          <EmptyState
+            title="No events available yet"
+            description="Check back later for new events."
+          />
+        </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
@@ -131,55 +167,51 @@ function EventCard({ event }: { event: Event }) {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      {event.coverImageUrl && (
+    <Card className="overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+      {event.coverImageUrl ? (
         <img
           src={event.coverImageUrl}
           alt={event.title}
           className="w-full h-48 object-cover"
         />
+      ) : (
+        <div className="w-full h-48 bg-surface-2 flex items-center justify-center text-text-subtle">
+          <CalendarIcon />
+        </div>
       )}
-      <div className="p-6">
-        <div className="flex items-start justify-between">
+      <Card.Body className="flex-1 flex flex-col">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="text-xl font-bold text-text">{event.title}</h3>
+            <p className="mt-1 text-sm text-text-muted">
               {event.venueName}
               {event.city && `, ${event.city}`}
               {event.country && `, ${event.country}`}
             </p>
           </div>
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              event.status === 'PUBLISHED'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-800'
-            }`}
-          >
-            {event.status}
-          </span>
+          <StatusPill kind="event" value={event.status} size="sm" />
         </div>
 
-        <div className="mt-4">
-          <div className="flex items-center text-sm text-gray-500">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {formatDate(event.startAt)} - {formatDate(event.endAt)}
+        <div className="mt-4 space-y-1">
+          <div className="flex items-center text-sm text-text-muted">
+            <span className="mr-1.5 text-text-subtle">
+              <CalendarIcon />
+            </span>
+            {formatDate(event.startAt)} – {formatDate(event.endAt)}
           </div>
           {event.locationType === 'ONLINE' && (
-            <div className="mt-1 flex items-center text-sm text-gray-500">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-              </svg>
+            <div className="flex items-center text-sm text-text-muted">
+              <span className="mr-1.5 text-text-subtle">
+                <GlobeIcon />
+              </span>
               Online Event
             </div>
           )}
         </div>
 
         {publishedTicketTypes.length > 0 && (
-          <div className="mt-4 border-t border-gray-100 pt-4">
-            <h4 className="text-sm font-medium text-gray-900">Ticket Types</h4>
+          <div className="mt-4 border-t border-border pt-4">
+            <h4 className="text-sm font-medium text-text">Ticket Types</h4>
             <div className="mt-2 space-y-2">
               {publishedTicketTypes.map((tt) => (
                 <TicketTypeRow key={tt.id} ticketType={tt} />
@@ -188,40 +220,36 @@ function EventCard({ event }: { event: Event }) {
           </div>
         )}
 
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <Link
-            to={`/events/${event.id}`}
-            className="block w-full text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            View Details & Reserve
-          </Link>
+        <div className="mt-auto pt-4">
+          <Button as="a" to={`/events/${event.id}`} variant="secondary" fullWidth>
+            View Details &amp; Reserve
+          </Button>
         </div>
-      </div>
-    </div>
+      </Card.Body>
+    </Card>
   );
 }
 
 function TicketTypeRow({ ticketType }: { ticketType: TicketType }) {
-  const available = getAvailableQuantity(ticketType);
+  const available = ticketType.quantity;
+  const isAvailable = available > 0;
 
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+    <div className="flex items-center justify-between p-3 bg-bg rounded-md">
       <div>
-        <p className="text-sm font-medium text-gray-900">{ticketType.name}</p>
+        <p className="text-sm font-medium text-text">{ticketType.name}</p>
         {ticketType.description && (
-          <p className="text-xs text-gray-500 truncate max-w-xs">{ticketType.description}</p>
+          <p className="text-xs text-text-muted truncate max-w-xs">{ticketType.description}</p>
         )}
       </div>
       <div className="flex items-center space-x-4">
-        <span className="text-sm font-semibold text-gray-900">{formatPrice(ticketType.price)}</span>
+        <span className="text-sm font-semibold text-text">{formatPrice(ticketType.price)}</span>
         <span
           className={`text-xs px-2 py-1 rounded-full ${
-            available > 0
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+            isAvailable ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'
           }`}
         >
-          {available > 0 ? `${available} left` : 'Sold out'}
+          {isAvailable ? `${available} left` : 'Sold out'}
         </span>
       </div>
     </div>

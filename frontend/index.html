@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Platform</title>
+    <script>
+      // Anti-FOUC: set .dark on <html> before React mounts.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var resolved = stored;
+          if (resolved !== 'light' && resolved !== 'dark') {
+            resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          if (resolved === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // Ignore — fall back to light
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

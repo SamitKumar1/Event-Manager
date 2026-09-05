@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { organizationsApi, organizerEventsApi, analyticsApi } from '../api/endpoints';
 import type { CreateEventRequest, UpdateEventRequest } from '../api/endpoints';
 import { useAuth } from '../context/useAuth';
+import { PageHeader, Card, Button, StatTile, StatusPill, Spinner, EmptyState } from '../components/ui';
 import type { Organization, Event, OrganizationAnalytics } from '../types/api';
 
 function formatDate(dateString: string): string {
@@ -20,21 +21,6 @@ function formatCurrency(amount: string): string {
     style: 'currency',
     currency: 'USD',
   }).format(Number(amount));
-}
-
-function getStatusBadgeClass(status: string): string {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'bg-green-100 text-green-800';
-    case 'DRAFT':
-      return 'bg-gray-100 text-gray-800';
-    case 'CANCELLED':
-      return 'bg-red-100 text-red-800';
-    case 'COMPLETED':
-      return 'bg-blue-100 text-blue-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
 }
 
 export default function OrganizerDashboard() {
@@ -234,7 +220,7 @@ export default function OrganizerDashboard() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent" />
+          <Spinner size="lg" />
         </div>
       </div>
     );
@@ -242,17 +228,16 @@ export default function OrganizerDashboard() {
 
   if (!isAuthenticated || user?.role === 'ATTENDEE') {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Organizer Access Required</h1>
-          <p className="text-gray-600">You need organizer or admin role to access this page.</p>
-          <Link
-            to="/dashboard"
-            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-          >
-            Go to Dashboard
-          </Link>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <EmptyState
+            title="Organizer Access Required"
+            description="You need organizer or admin role to access this page."
+            action={
+              <Button as="a" to="/dashboard">Go to Dashboard</Button>
+            }
+          />
+        </Card>
       </div>
     );
   }
@@ -262,46 +247,38 @@ export default function OrganizerDashboard() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Organizer Dashboard</h1>
-          <p className="mt-1 text-gray-600">Manage your organizations and events</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <select
-            value={selectedOrgId || ''}
-            onChange={(e) => setSelectedOrgId(e.target.value || null)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">Select Organization</option>
-            {organizations.map((org) => (
-              <option key={org.id} value={org.id}>
-                {org.name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => setShowCreateOrgModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-          >
-            + New Organization
-          </button>
-          {selectedOrgId && (
-            <button
-              onClick={() => setShowCreateEventModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+      <PageHeader
+        title="Organizer Dashboard"
+        subtitle="Manage your organizations and events"
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={selectedOrgId || ''}
+              onChange={(e) => setSelectedOrgId(e.target.value || null)}
+              className="h-10 px-3 border border-border rounded-md text-sm bg-surface text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
-              + Create Event
-            </button>
-          )}
-        </div>
-      </div>
+              <option value="">Select Organization</option>
+              {organizations.map((org) => (
+                <option key={org.id} value={org.id}>
+                  {org.name}
+                </option>
+              ))}
+            </select>
+            <Button onClick={() => setShowCreateOrgModal(true)}>New Organization</Button>
+            {selectedOrgId && (
+              <Button onClick={() => setShowCreateEventModal(true)} variant="secondary">
+                Create Event
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* Error Toast */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md flex items-center justify-between animate-fade-in">
+        <div className="bg-danger-soft text-danger p-4 rounded-md flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
+          <button onClick={() => setError(null)} className="text-danger hover:opacity-80">
             ✕
           </button>
         </div>
@@ -310,32 +287,52 @@ export default function OrganizerDashboard() {
       {/* Organization Analytics */}
       {selectedOrg && analytics && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Events" value={analytics.totalEvents} />
-          <StatCard title="Published" value={analytics.publishedEvents} color="green" />
-          <StatCard title="Tickets Sold" value={analytics.ticketsSold} color="blue" />
-          <StatCard title="Revenue" value={formatCurrency(analytics.totalRevenue)} color="purple" />
+          <StatTile
+            label="Total Events"
+            value={analytics.totalEvents}
+            tone="primary"
+            caption="Across this organization"
+          />
+          <StatTile
+            label="Published"
+            value={analytics.publishedEvents}
+            tone="success"
+            caption="Live and on sale"
+          />
+          <StatTile
+            label="Tickets Sold"
+            value={analytics.ticketsSold}
+            tone="info"
+            caption="Across all events"
+          />
+          <StatTile
+            label="Revenue"
+            value={formatCurrency(analytics.totalRevenue)}
+            tone="warning"
+            caption="Net of refunds"
+          />
         </div>
       )}
 
       {/* Events List */}
       {selectedOrg && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Events</h2>
-            <span className="text-sm text-gray-500">{events.length} events</span>
-          </div>
+        <Card>
+          <Card.Header>
+            <h2 className="text-lg font-semibold text-text">Events</h2>
+            <span className="text-sm text-text-muted">{events.length} events</span>
+          </Card.Header>
           {events.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="text-gray-500 mb-4">No events yet</p>
-              <button
-                onClick={() => setShowCreateEventModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-              >
-                Create Your First Event
-              </button>
-            </div>
+            <EmptyState
+              title="No events yet"
+              description="Create your first event to start selling tickets."
+              action={
+                <Button onClick={() => setShowCreateEventModal(true)}>
+                  Create Your First Event
+                </Button>
+              }
+            />
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-border">
               {events.map((event) => (
                 <EventRow
                   key={event.id}
@@ -348,25 +345,30 @@ export default function OrganizerDashboard() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {!selectedOrg && organizations.length > 0 && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-          <p className="text-gray-500">Select an organization to view events</p>
-        </div>
+        <Card>
+          <EmptyState
+            title="Select an organization"
+            description="Pick an organization from the dropdown above to view its events."
+          />
+        </Card>
       )}
 
       {!selectedOrg && organizations.length === 0 && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-          <p className="text-gray-500 mb-4">No organizations yet</p>
-          <button
-            onClick={() => setShowCreateOrgModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-          >
-            Create Organization
-          </button>
-        </div>
+        <Card>
+          <EmptyState
+            title="No organizations yet"
+            description="Create an organization to start hosting events."
+            action={
+              <Button onClick={() => setShowCreateOrgModal(true)}>
+                Create Organization
+              </Button>
+            }
+          />
+        </Card>
       )}
 
       {/* Create Organization Modal */}
@@ -391,26 +393,6 @@ export default function OrganizerDashboard() {
   );
 }
 
-function StatCard({ title, value, color = 'indigo' }: { title: string; value: string | number; color?: string }) {
-  const colors = {
-    indigo: 'bg-indigo-100 text-indigo-800',
-    green: 'bg-green-100 text-green-800',
-    blue: 'bg-blue-100 text-blue-800',
-    purple: 'bg-purple-100 text-purple-800',
-    red: 'bg-red-100 text-red-800',
-  };
-
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <p className="text-sm font-medium text-gray-500">{title}</p>
-      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
-      <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-        <span className={colors[color as keyof typeof colors] || colors.indigo}>Organization</span>
-      </div>
-    </div>
-  );
-}
-
 function EventRow({
   event,
   onPublish,
@@ -428,25 +410,23 @@ function EventRow({
   const totalCapacity = event.ticketTypes?.reduce((sum, tt) => sum + tt.quantity, 0) || 0;
 
   return (
-    <div className="px-6 py-4 hover:bg-gray-50">
+    <div className="px-6 py-4 hover:bg-bg">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-12 h-12 bg-surface-2 rounded-lg flex items-center justify-center">
+            <svg className="w-6 h-6 text-text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
             </svg>
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">{event.title}</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-medium text-text">{event.title}</h3>
+            <p className="text-sm text-text-muted">
               {formatDate(event.startAt)} • {ticketTypesCount} ticket types • {totalCapacity} capacity
             </p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(event.status)}`}>
-            {event.status}
-          </span>
+          <StatusPill kind="event" value={event.status} size="sm" />
           {event.status === 'DRAFT' && (
             <>
               <button
@@ -457,7 +437,7 @@ function EventRow({
               </button>
               <button
                 onClick={() => onDelete(event.id)}
-                className="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-md"
+                className="px-3 py-1.5 text-sm font-medium text-danger hover:bg-danger-soft border border-danger rounded-md"
               >
                 Delete
               </button>
@@ -466,7 +446,7 @@ function EventRow({
           {event.status === 'PUBLISHED' && (
             <button
               onClick={() => onCancel(event.id)}
-              className="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-md"
+              className="px-3 py-1.5 text-sm font-medium text-danger hover:bg-danger-soft border border-danger rounded-md"
             >
               Cancel
             </button>
@@ -479,7 +459,7 @@ function EventRow({
           </Link>
           <Link
             to={`/organizer/events/${event.id}/analytics`}
-            className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-700"
+            className="px-3 py-1.5 text-sm font-medium text-text-muted hover:text-text-muted"
           >
             Analytics
           </Link>
@@ -519,42 +499,42 @@ function CreateOrgModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Create Organization</h2>
+        <div className="relative bg-surface rounded-lg shadow-xl max-w-md w-full p-6">
+          <h2 className="text-xl font-bold text-text mb-4">Create Organization</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-danger-soft text-danger p-3 rounded-md text-sm">{error}</div>}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL-friendly)</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Slug (URL-friendly)</label>
               <input
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 required
                 pattern="^[a-z0-9-]+$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Description (optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div className="flex justify-end space-x-3 pt-4">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-muted bg-surface border border-border rounded-md hover:bg-bg">
                 Cancel
               </button>
               <button type="submit" disabled={isLoading} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50">
@@ -622,48 +602,48 @@ function CreateEventModal({ onClose, onSubmit }: { onClose: () => void; onSubmit
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
-        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Create Event</h2>
+        <div className="relative bg-surface rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <h2 className="text-xl font-bold text-text mb-4">Create Event</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-danger-soft text-danger p-3 rounded-md text-sm">{error}</div>}
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Title</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Slug</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => handleChange('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                   required
                   pattern="^[a-z0-9-]+$"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location Type</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Location Type</label>
               <select
                 value={formData.locationType}
                 onChange={(e) => handleChange('locationType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="PHYSICAL">Physical</option>
                 <option value="ONLINE">Online</option>
@@ -673,104 +653,104 @@ function CreateEventModal({ onClose, onSubmit }: { onClose: () => void; onSubmit
             {(formData.locationType === 'PHYSICAL' || formData.locationType === 'HYBRID') && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Venue Name</label>
                   <input
                     type="text"
                     value={formData.venueName}
                     onChange={(e) => handleChange('venueName', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Address</label>
                   <input
                     type="text"
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">City</label>
                   <input
                     type="text"
                     value={formData.city}
                     onChange={(e) => handleChange('city', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Country</label>
                   <input
                     type="text"
                     value={formData.country}
                     onChange={(e) => handleChange('country', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
             )}
             {formData.locationType === 'ONLINE' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name (Platform)</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Venue Name (Platform)</label>
                 <input
                   type="text"
                   value={formData.venueName}
                   onChange={(e) => handleChange('venueName', e.target.value)}
                   required
                   placeholder="e.g., Zoom, YouTube Live"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             )}
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Start Date & Time</label>
                 <input
                   type="datetime-local"
                   value={formData.startAt}
                   onChange={(e) => handleChange('startAt', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">End Date & Time</label>
                 <input
                   type="datetime-local"
                   value={formData.endAt}
                   onChange={(e) => handleChange('endAt', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Timezone</label>
               <input
                 type="text"
                 value={formData.timezone}
                 onChange={(e) => handleChange('timezone', e.target.value)}
                 required
                 placeholder="e.g., UTC, America/New_York"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL (optional)</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Cover Image URL (optional)</label>
               <input
                 type="url"
                 value={formData.coverImageUrl}
                 onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div className="flex justify-end space-x-3 pt-4">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-muted bg-surface border border-border rounded-md hover:bg-bg">
                 Cancel
               </button>
               <button type="submit" disabled={isLoading} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50">
@@ -846,48 +826,48 @@ function EditEventModal({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
-        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Event</h2>
+        <div className="relative bg-surface rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <h2 className="text-xl font-bold text-text mb-4">Edit Event</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-danger-soft text-danger p-3 rounded-md text-sm">{error}</div>}
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Title</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Slug</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => handleChange('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                   required
                   pattern="^[a-z0-9-]+$"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location Type</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Location Type</label>
               <select
                 value={formData.locationType}
                 onChange={(e) => handleChange('locationType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="PHYSICAL">Physical</option>
                 <option value="ONLINE">Online</option>
@@ -897,104 +877,104 @@ function EditEventModal({
             {(formData.locationType === 'PHYSICAL' || formData.locationType === 'HYBRID') && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Venue Name</label>
                   <input
                     type="text"
                     value={formData.venueName}
                     onChange={(e) => handleChange('venueName', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Address</label>
                   <input
                     type="text"
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">City</label>
                   <input
                     type="text"
                     value={formData.city}
                     onChange={(e) => handleChange('city', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1">Country</label>
                   <input
                     type="text"
                     value={formData.country}
                     onChange={(e) => handleChange('country', e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
             )}
             {formData.locationType === 'ONLINE' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name (Platform)</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Venue Name (Platform)</label>
                 <input
                   type="text"
                   value={formData.venueName}
                   onChange={(e) => handleChange('venueName', e.target.value)}
                   required
                   placeholder="e.g., Zoom, YouTube Live"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             )}
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">Start Date & Time</label>
                 <input
                   type="datetime-local"
                   value={formData.startAt}
                   onChange={(e) => handleChange('startAt', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
+                <label className="block text-sm font-medium text-text-muted mb-1">End Date & Time</label>
                 <input
                   type="datetime-local"
                   value={formData.endAt}
                   onChange={(e) => handleChange('endAt', e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Timezone</label>
               <input
                 type="text"
                 value={formData.timezone}
                 onChange={(e) => handleChange('timezone', e.target.value)}
                 required
                 placeholder="e.g., UTC, America/New_York"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL (optional)</label>
+              <label className="block text-sm font-medium text-text-muted mb-1">Cover Image URL (optional)</label>
               <input
                 type="url"
                 value={formData.coverImageUrl}
                 onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div className="flex justify-end space-x-3 pt-4">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-muted bg-surface border border-border rounded-md hover:bg-bg">
                 Cancel
               </button>
               <button type="submit" disabled={isLoading} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50">
