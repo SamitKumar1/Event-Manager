@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ExpirationService } from './expiration.service';
 import { ReservationStatus } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+import { ExpirationService } from './expiration.service';
 
 const mockPrisma = {
   ticketReservation: {

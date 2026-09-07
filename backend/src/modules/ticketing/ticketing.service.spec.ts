@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TicketingService } from './ticketing.service';
 import { OrganizationRole } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+import { TicketingService } from './ticketing.service';
 
 const mockPrisma = {
   ticketType: {

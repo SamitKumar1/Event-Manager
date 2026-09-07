@@ -118,18 +118,57 @@ describe('ExpirationController (e2e)', () => {
 
   it('should not affect future reservations', async () => {
     const future = new Date(Date.now() + 3600000);
-    
-    const event = await prisma.event.findFirst();
-    expect(event).toBeTruthy();
-    const ticketType = await prisma.ticketType.findFirst({ where: { eventId: event!.id } });
-    expect(ticketType).toBeTruthy();
-    const user = await prisma.user.findFirst({ where: { role: Role.ATTENDEE } });
-    expect(user).toBeTruthy();
+
+    // Create a new user for this test to ensure isolation
+    const unique = Date.now();
+    const testUser = await prisma.user.create({
+      data: {
+        name: 'Future User',
+        email: `future_${unique}@example.com`,
+        passwordHash: await bcrypt.hash('test-password', 10),
+        role: Role.ATTENDEE,
+      },
+    });
+
+    // Create a new organization for this test
+    const testOrg = await prisma.organization.create({
+      data: {
+        name: 'Future Org',
+        slug: `future-org-${unique}`,
+        members: { create: [{ userId: testUser.id, role: OrganizationRole.MEMBER }] },
+      },
+    });
+
+    const testEvent = await prisma.event.create({
+      data: {
+        organizationId: testOrg.id,
+        createdById: testUser.id,
+        title: 'Future Event',
+        slug: `future-event-${unique}`,
+        startAt: new Date('2025-10-10T10:00:00Z'),
+        endAt: new Date('2025-10-10T12:00:00Z'),
+        timezone: 'UTC',
+        locationType: 'ONLINE',
+        venueName: 'Zoom',
+        status: EventStatus.PUBLISHED,
+      },
+    });
+
+    const testTicketType = await prisma.ticketType.create({
+      data: {
+        eventId: testEvent.id,
+        name: 'Future Ticket',
+        price: 30,
+        quantity: 5,
+        salesStartAt: new Date('2020-01-01'),
+        salesEndAt: new Date('2030-01-01'),
+      },
+    });
 
     const resv = await prisma.ticketReservation.create({
       data: {
-        ticketTypeId: ticketType!.id,
-        userId: user!.id,
+        ticketTypeId: testTicketType.id,
+        userId: testUser.id,
         quantity: 1,
         status: ReservationStatus.ACTIVE,
         expiresAt: future,

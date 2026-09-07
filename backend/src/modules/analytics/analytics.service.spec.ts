@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AnalyticsService } from './analytics.service';
 import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+import { AnalyticsService } from './analytics.service';
 
 const mockPrisma = {
   event: {

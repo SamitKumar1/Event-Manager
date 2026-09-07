@@ -1,15 +1,19 @@
+import type { Request } from 'express';
 import {
   Controller,
   Get,
   Patch,
   Param,
   Query,
-  Request,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { NotificationsService } from './notifications.service';
 import { NotificationQueryDto } from './dto/notification-query.dto';
 
@@ -20,7 +24,7 @@ export class NotificationsController {
 
   @Get()
   async findAll(
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Query() query: NotificationQueryDto,
   ) {
     const { page = 1, limit = 20, unreadOnly } = query;
@@ -28,20 +32,20 @@ export class NotificationsController {
   }
 
   @Get('unread-count')
-  async getUnreadCount(@Request() req: any) {
+  async getUnreadCount(@Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     const count = await this.service.getUnreadCount(req.user.sub);
     return { count };
   }
 
   @Patch(':id/read')
   @HttpCode(HttpStatus.OK)
-  async markAsRead(@Request() req: any, @Param('id') id: string) {
+  async markAsRead(@Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Param('id') id: string) {
     return this.service.markAsRead(req.user.sub, id);
   }
 
   @Patch('read-all')
   @HttpCode(HttpStatus.OK)
-  async markAllAsRead(@Request() req: any) {
+  async markAllAsRead(@Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.markAllAsRead(req.user.sub);
   }
 }

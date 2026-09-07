@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { EmailService } from './email.service';
 import { EmailProvider } from './email.provider';
 

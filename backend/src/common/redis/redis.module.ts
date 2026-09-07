@@ -1,6 +1,7 @@
 import { Global, Module, DynamicModule, Provider, OnModuleDestroy } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+
 import { RedisLockService } from './redis-lock.service';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';

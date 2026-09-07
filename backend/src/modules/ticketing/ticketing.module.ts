@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { PrismaModule } from '../../prisma/prisma.module';
+import { EventsModule } from '../events/events.module';
+
 import { TicketingController, TicketTypesGlobalController } from './ticketing.controller';
 import { TicketingService } from './ticketing.service';
 import { TicketTypeOrgMembershipGuard } from './guards/ticket-type-org-membership.guard';
-import { PrismaModule } from '../../prisma/prisma.module';
-import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [

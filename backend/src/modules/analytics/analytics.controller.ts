@@ -4,12 +4,14 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { OrganizationRole } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { OrgMembershipGuard } from '../organizations/guards/org-membership.guard';
 import { EventOrgMembershipGuard } from '../events/guards/event-org-membership.guard';
 import { OrgRolesGuard } from '../organizations/guards/org-roles.guard';
 import { OrgRoles } from '../organizations/decorators/org-roles.decorator';
-import { OrganizationRole } from '@prisma/client';
+
 import { AnalyticsService } from './analytics.service';
 
 @Controller()

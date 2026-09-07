@@ -7,16 +7,18 @@ import {
   Param,
   Body,
   Query,
-  Request,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { OrganizationRole } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { EventOrgMembershipGuard } from '../events/guards/event-org-membership.guard';
 import { OrgRolesGuard } from '../organizations/guards/org-roles.guard';
 import { OrgRoles } from '../organizations/decorators/org-roles.decorator';
-import { OrganizationRole } from '@prisma/client';
+
 import { TicketingService } from './ticketing.service';
 import { CreateTicketTypeDto } from './dto/create-ticket-type.dto';
 import { UpdateTicketTypeDto } from './dto/update-ticket-type.dto';
@@ -33,7 +35,7 @@ export class TicketingController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Param('eventId') eventId: string,
-    @Request() req: any,
+    @Req() req: any,
     @Body() dto: CreateTicketTypeDto,
   ) {
     return this.service.create(eventId, req.user.sub, req.orgMembership.role, dto);
@@ -64,7 +66,7 @@ export class TicketTypesGlobalController {
   @UseGuards(TicketTypeOrgMembershipGuard, OrgRolesGuard)
   @OrgRoles(OrganizationRole.OWNER, OrganizationRole.ADMIN)
   @Patch(':id')
-  async update(@Param('id') id: string, @Request() req: any, @Body() dto: UpdateTicketTypeDto) {
+  async update(@Param('id') id: string, @Req() req: any, @Body() dto: UpdateTicketTypeDto) {
     return this.service.update(id, req.user.sub, req.orgMembership.role, dto);
   }
 
@@ -72,7 +74,7 @@ export class TicketTypesGlobalController {
   @OrgRoles(OrganizationRole.OWNER)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async remove(@Param('id') id: string, @Request() req: any) {
+  async remove(@Param('id') id: string, @Req() req: any) {
     return this.service.remove(id, req.orgMembership.role);
   }
 }

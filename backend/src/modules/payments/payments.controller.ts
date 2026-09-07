@@ -1,6 +1,10 @@
-import { Controller, Post, Get, Param, Body, Request, UseGuards, HttpStatus, Headers, BadRequestException, Res } from '@nestjs/common';
+import type { Request } from 'express';
+import { Controller, Post, Get, Param, Body, Req, UseGuards, HttpStatus, Headers, BadRequestException, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 
@@ -17,7 +21,7 @@ export class PaymentsController {
   @Post()
   async create(
     @Param('orderId') orderId: string,
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Body() dto: CreatePaymentDto,
     @Headers('idempotency-key') idempotencyKey: string,
     @Res() res: Response,
@@ -37,7 +41,7 @@ export class PaymentsGlobalController {
   constructor(private readonly service: PaymentsService) {}
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Request() req: any) {
+  async findOne(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.findOne(id, req.user.sub);
   }
 }

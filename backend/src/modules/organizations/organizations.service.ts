@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { Role, OrganizationRole } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
+
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
-import { Role, OrganizationRole } from '@prisma/client';
 
 @Injectable()
 export class OrganizationsService {

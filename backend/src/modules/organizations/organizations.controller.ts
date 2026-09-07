@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, Request, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import type { Request } from 'express';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { OrganizationRole, Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { OrgMembershipGuard } from './guards/org-membership.guard';
 import { OrgRolesGuard } from './guards/org-roles.guard';
 import { OrgRoles } from './decorators/org-roles.decorator';
-import { OrganizationRole } from '@prisma/client';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -17,25 +20,25 @@ export class OrganizationsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Request() req: any, @Body() dto: CreateOrganizationDto) {
+  create(@Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Body() dto: CreateOrganizationDto) {
     return this.service.create(req.user.sub, req.user.role, dto);
   }
 
   @Get()
-  findAll(@Request() req: any, @Query('page') page = 1, @Query('limit') limit = 10) {
+  findAll(@Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Query('page') page = 1, @Query('limit') limit = 10) {
     return this.service.findAll(req.user.sub, Number(page), Number(limit));
   }
 
   @UseGuards(OrgMembershipGuard)
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req: any) {
+  findOne(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.findOne(req.user.sub, id);
   }
 
   @UseGuards(OrgMembershipGuard, OrgRolesGuard)
   @OrgRoles(OrganizationRole.OWNER, OrganizationRole.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Request() req: any, @Body() dto: UpdateOrganizationDto) {
+  update(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Body() dto: UpdateOrganizationDto) {
     return this.service.update(req.user.sub, id, dto);
   }
 
@@ -43,7 +46,7 @@ export class OrganizationsController {
   @OrgRoles(OrganizationRole.OWNER)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  delete(@Param('id') id: string, @Request() req: any) {
+  delete(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.delete(req.user.sub, id);
   }
 
@@ -52,27 +55,27 @@ export class OrganizationsController {
   @OrgRoles(OrganizationRole.OWNER, OrganizationRole.ADMIN)
   @Post(':id/members')
   @HttpCode(HttpStatus.CREATED)
-  addMember(@Param('id') id: string, @Request() req: any, @Body() dto: InviteMemberDto) {
+  addMember(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Body() dto: InviteMemberDto) {
     return this.service.addMember(req.user.sub, id, dto);
   }
 
   @UseGuards(OrgMembershipGuard)
   @Get(':id/members')
-  getMembers(@Param('id') id: string, @Request() req: any, @Query('page') page = 1, @Query('limit') limit = 10) {
+  getMembers(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Query('page') page = 1, @Query('limit') limit = 10) {
     return this.service.getMembers(req.user.sub, id, Number(page), Number(limit));
   }
 
   @UseGuards(OrgMembershipGuard, OrgRolesGuard)
   @OrgRoles(OrganizationRole.OWNER, OrganizationRole.ADMIN)
   @Patch(':id/members/:userId')
-  updateMemberRole(@Param('id') id: string, @Param('userId') userId: string, @Request() req: any, @Body() dto: UpdateMemberRoleDto) {
+  updateMemberRole(@Param('id') id: string, @Param('userId') userId: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }, @Body() dto: UpdateMemberRoleDto) {
     return this.service.updateMemberRole(req.user.sub, id, userId, dto);
   }
 
   @UseGuards(OrgMembershipGuard)
   @Delete(':id/members/:userId')
   @HttpCode(HttpStatus.OK)
-  removeMember(@Param('id') id: string, @Param('userId') userId: string, @Request() req: any) {
+  removeMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.removeMember(req.user.sub, id, userId);
   }
 }

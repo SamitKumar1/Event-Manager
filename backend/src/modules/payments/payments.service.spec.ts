@@ -1,15 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { PaymentsService } from './payments.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { PaymentProvider } from './providers/payment-provider.interface';
 import { PaymentStatus, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../email/email.service';
+
+import { PaymentProvider } from './providers/payment-provider.interface';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { PaymentsService } from './payments.service';
 
 type TransactionClient = Prisma.TransactionClient;
 

@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { OrderStatus, ReservationStatus, Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, CreateOrderItemDto } from './dto/create-order.dto';
-import { OrderStatus, ReservationStatus, Prisma } from '@prisma/client';
+
 
 const mockPrisma = {
   ticketReservation: {

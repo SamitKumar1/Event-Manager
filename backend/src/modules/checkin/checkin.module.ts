@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CheckinController } from './checkin.controller';
-import { CheckinService } from './checkin.service';
+
 import { PrismaModule } from '../../prisma/prisma.module';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { EventsModule } from '../events/events.module';
 import { EmailModule } from '../email/email.module';
+
+import { CheckinService } from './checkin.service';
+import { CheckinController } from './checkin.controller';
 
 @Module({
   imports: [

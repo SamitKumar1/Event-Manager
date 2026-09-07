@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ReservationsController } from './reservations.controller';
-import { ReservationsService } from './reservations.service';
+
 import { PrismaModule } from '../../prisma/prisma.module';
 import { RedisModule } from '../../common/redis/redis.module';
+
+import { ReservationsController } from './reservations.controller';
+import { ReservationsService } from './reservations.service';
 
 @Module({
   imports: [

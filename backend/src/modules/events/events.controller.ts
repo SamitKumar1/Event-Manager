@@ -7,16 +7,19 @@ import {
   Param,
   Body,
   Query,
-  Request,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import type { Request } from 'express';
+import { OrganizationRole, Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { OrgMembershipGuard } from '../organizations/guards/org-membership.guard';
 import { OrgRolesGuard } from '../organizations/guards/org-roles.guard';
 import { OrgRoles } from '../organizations/decorators/org-roles.decorator';
-import { OrganizationRole } from '@prisma/client';
+
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -32,7 +35,7 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Param('organizationId') organizationId: string,
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Body() dto: CreateEventDto,
   ) {
     return this.service.create(organizationId, req.user.sub, dto);
@@ -60,7 +63,7 @@ export class EventsController {
   async update(
     @Param('organizationId') organizationId: string,
     @Param('id') id: string,
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Body() dto: UpdateEventDto,
   ) {
     return this.service.update(id, req.user.sub, organizationId, dto);

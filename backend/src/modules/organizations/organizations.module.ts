@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { PrismaModule } from '../../prisma/prisma.module';
+
 import { OrganizationsController } from './organizations.controller';
 import { OrganizationsService } from './organizations.service';
 import { OrgMembershipGuard } from './guards/org-membership.guard';
 import { OrgRolesGuard } from './guards/org-roles.guard';
-import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
   imports: [

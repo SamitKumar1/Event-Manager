@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PaymentsController, PaymentsGlobalController } from './payments.controller';
-import { PaymentsService } from './payments.service';
-import { MockPaymentProvider } from './providers/mock-payment.provider';
+
 import { PrismaModule } from '../../prisma/prisma.module';
 import { TicketsModule } from '../tickets/tickets.module';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { EmailModule } from '../email/email.module';
+
+import { MockPaymentProvider } from './providers/mock-payment.provider';
+import { PaymentsService } from './payments.service';
+import { PaymentsController, PaymentsGlobalController } from './payments.controller';
 
 @Module({
   imports: [

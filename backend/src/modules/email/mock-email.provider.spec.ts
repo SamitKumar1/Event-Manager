@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+
 import { MockEmailProvider } from './mock-email.provider';
 
 describe('MockEmailProvider', () => {

@@ -1,7 +1,9 @@
 import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -56,7 +58,7 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
-    const { passwordHash, ...safeUser } = user;
+    const { passwordHash: _, ...safeUser } = user;
     return {
       accessToken,
       user: safeUser,

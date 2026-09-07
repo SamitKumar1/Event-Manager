@@ -12,7 +12,9 @@ import { Server, Socket } from 'socket.io';
 import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+
 import { PrismaService } from '../../prisma/prisma.service';
+
 import { RealtimeService } from './realtime.service';
 
 @WebSocketGateway({ cors: true, namespace: '/' })
@@ -41,8 +43,8 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       client.data.user = payload; // { sub, email, role }
       // join personal room
       client.join(`user:${payload.sub}`);
-      console.log(`WS connected: ${client.id} user ${payload.sub}`);
-    } catch (e) {
+      // silently reject invalid connections
+    } catch {
       client.disconnect();
       throw new UnauthorizedException('Invalid token');
     }

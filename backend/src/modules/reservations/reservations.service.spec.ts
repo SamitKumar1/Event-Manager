@@ -1,11 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { ReservationStatus } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
 import { RedisLockService } from '../../common/redis/redis-lock.service';
+
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { ReservationStatus } from '@prisma/client';
+
 
 const mockPrisma = {
   ticketType: {

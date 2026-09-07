@@ -1,8 +1,11 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
+import { Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '@prisma/client';
+
 import { HealthService } from './health.service';
 
 @Controller('health')
@@ -16,7 +19,7 @@ export class HealthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('protected')
-  protected(@Request() req: any) {
+  protected(@Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     const user = req.user;
     return {
       message: 'Authenticated',
@@ -31,7 +34,7 @@ export class HealthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get('admin')
-  admin(@Request() req: any) {
+  admin(@Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     const user = req.user;
     return {
       message: 'Admin access granted',

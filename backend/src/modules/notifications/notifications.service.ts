@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Notification } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { RealtimeService } from '../realtime/realtime.service';
-import { Notification } from '@prisma/client';
 
 export interface CreateNotificationInput {
   userId: string;

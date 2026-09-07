@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+
+import { PrismaService } from '../../prisma/prisma.service';
 import { RedisLockService } from '../../common/redis/redis-lock.service';
+
+import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Injectable()
 export class ReservationsService {

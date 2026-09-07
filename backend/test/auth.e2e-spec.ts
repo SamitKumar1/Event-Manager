@@ -14,6 +14,7 @@ describe('AuthController (e2e)', () => {
   let attendeeToken: string;
   let organizerToken: string;
   let adminToken: string;
+  const unique = Date.now(); // Shared timestamp for test data isolation
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,7 +30,6 @@ describe('AuthController (e2e)', () => {
     prisma = moduleFixture.get(PrismaService);
 
     const passwordHash = await bcrypt.hash('test-password', 10);
-    const unique = Date.now();
 
     // Attendee user
     const attendee = await prisma.user.create({
@@ -78,6 +78,29 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
+    // Cleanup test data
+    const unique = Date.now();
+    await prisma.user.deleteMany({
+      where: {
+        email: {
+          contains: `attendee_${unique}`,
+        },
+      },
+    });
+    await prisma.user.deleteMany({
+      where: {
+        email: {
+          contains: `organizer_${unique}`,
+        },
+      },
+    });
+    await prisma.user.deleteMany({
+      where: {
+        email: {
+          contains: `admin_${unique}`,
+        },
+      },
+    });
     await app.close();
   });
 

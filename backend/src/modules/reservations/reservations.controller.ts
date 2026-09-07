@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import {
   Controller,
   Get,
@@ -5,12 +6,15 @@ import {
   Param,
   Body,
   Query,
-  Request,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 
@@ -23,20 +27,20 @@ export class ReservationsController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Param('ticketTypeId') ticketTypeId: string,
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Body() dto: CreateReservationDto,
   ) {
     return this.service.create(ticketTypeId, req.user.sub, dto);
   }
 
   @Get('reservations/:id')
-  async findOne(@Param('id') id: string, @Request() req: any) {
+  async findOne(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.findOne(id, req.user.sub);
   }
 
   @Get('users/me/reservations')
   async findMy(
-    @Request() req: any,
+    @Req() req: Request & { user: { sub: string; email: string; role: Role } },
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
@@ -45,7 +49,7 @@ export class ReservationsController {
 
   @Post('reservations/:id/cancel')
   @HttpCode(HttpStatus.OK)
-  async cancel(@Param('id') id: string, @Request() req: any) {
+  async cancel(@Param('id') id: string, @Req() req: Request & { user: { sub: string; email: string; role: Role } }) {
     return this.service.cancel(id, req.user.sub);
   }
 }

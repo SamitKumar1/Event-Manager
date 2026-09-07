@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
+import { OrganizationRole } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
+
 import { CreateTicketTypeDto } from './dto/create-ticket-type.dto';
 import { UpdateTicketTypeDto } from './dto/update-ticket-type.dto';
-import { OrganizationRole } from '@prisma/client';
 
 @Injectable()
 export class TicketingService {

@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TicketsService } from './tickets.service';
 import { TicketStatus, OrderStatus, Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+import { TicketsService } from './tickets.service';
 
 type TransactionClient = Prisma.TransactionClient;
 
